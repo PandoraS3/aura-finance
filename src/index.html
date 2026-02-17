@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA | Gestion de Patrimoine</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AURA <span class="subtitle">FINANCE</span></h1>
+            <p class="date-display" id="currentDate"></p>
+        </header>
+
+        <section class="main-stats">
+            <div class="card balance-card">
+                <h3>Solde Total</h3>
+                <p class="amount" id="totalBalance">12 450,00 €</p>
+            </div>
+            <div class="card savings-card">
+                <h3>Épargne</h3>
+                <p class="amount" id="totalSavings">4 200,00 €</p>
+            </div>
+        </section>
+
+        <section class="goal-engine card">
+            <h2>Calculateur d'Objectif Cloud-Native</h2>
+            <div class="input-group">
+                <input type="number" id="targetAmount" placeholder="Montant cible (ex: 10000)">
+                <input type="number" id="monthlyInput" placeholder="Épargne mensuelle">
+                <button onclick="calculateGoal()">Analyser la faisabilité</button>
+            </div>
+            <p id="goalResult" class="result-text"></p>
+        </section>
+
+        <section class="transactions card">
+            <h2>Dernières Opérations</h2>
+            <ul id="transactionList">
+                <li><span>Loyer Prestige</span> <span class="neg">- 1 200 €</span></li>
+                <li><span>Dividendes</span> <span class="pos">+ 450 €</span></li>
+            </ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
