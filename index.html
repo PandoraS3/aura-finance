@@ -6,6 +6,7 @@
     <title>AURA | Gestion de Patrimoine</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -35,13 +36,23 @@
             <p id="goalResult" class="result-text"></p>
         </section>
 
-        <section class="transactions card">
-            <h2>Dernières Opérations</h2>
-            <ul id="transactionList">
-                <li><span>Loyer Prestige</span> <span class="neg">- 1 200 €</span></li>
-                <li><span>Dividendes</span> <span class="pos">+ 450 €</span></li>
-            </ul>
-        </section>
+       <section class="card input-section">
+    <h2>Enregistrer une Transaction</h2>
+    <div class="transaction-form">
+        <input type="text" id="desc" placeholder="Description (ex: Restaurant, Salaire...)">
+        <input type="number" id="val" placeholder="Montant (€)">
+        <select id="type">
+            <option value="entree">Entrée (+)</option>
+            <option value="depense">Dépense (-)</option>
+        </select>
+        <button onclick="addTransaction()">Ajouter</button>
+    </div>
+</section>
+
+<section class="card chart-section">
+    <h2>Analyse Mensuelle</h2>
+    <canvas id="financeChart"></canvas>
+</section>
     </div>
     <script src="script.js"></script>
 </body>

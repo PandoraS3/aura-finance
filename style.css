@@ -56,3 +56,22 @@ button {
 
 .pos { color: var(--primary-green); }
 .neg { color: #e74c3c; }
+.transaction-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+select {
+    background: #1f1f1f;
+    border: 1px solid #333;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+canvas {
+    max-height: 300px;
+    margin-top: 20px;
+}

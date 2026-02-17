@@ -1,19 +1,50 @@
-function calculateGoal() {
-    const target = document.getElementById('targetAmount').value;
-    const monthly = document.getElementById('monthlyInput').value;
-    const resultDisplay = document.getElementById('goalResult');
+let dataFinance = JSON.parse(localStorage.getItem('aura_data')) || { entrees: [0,0,0], depenses: [0,0,0] };
+let myChart;
 
-    if (target > 0 && monthly > 0) {
-        const months = Math.ceil(target / monthly);
-        const years = (months / 12).toFixed(1);
-        
-        resultDisplay.innerHTML = `Objectif atteignable en <strong>${months} mois</strong> (environ ${years} ans).<br> 
-        Conseil : Augmentez votre épargne de 10% pour gagner ${Math.ceil(months * 0.1)} mois.`;
-        resultDisplay.style.color = "#2ecc71";
-    } else {
-        resultDisplay.innerText = "Veuillez entrer des montants valides.";
-        resultDisplay.style.color = "#e74c3c";
-    }
+function initChart() {
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Janvier', 'Février', 'Mars'], // Tu peux automatiser les mois après
+            datasets: [{
+                label: 'Entrées',
+                data: dataFinance.entrees,
+                backgroundColor: '#2ecc71'
+            }, {
+                label: 'Dépenses',
+                data: dataFinance.depenses,
+                backgroundColor: '#e74c3c'
+            }]
+        },
+        options: {
+            plugins: { legend: { labels: { color: 'white' } } },
+            scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } }
+        }
+    });
 }
 
-document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+function addTransaction() {
+    const desc = document.getElementById('desc').value;
+    const val = parseFloat(document.getElementById('val').value);
+    const type = document.getElementById('type').value;
+
+    if (!val || val <= 0) return alert("Entrez un montant valide");
+
+    // Pour l'exemple, on ajoute au mois en cours (Mars par exemple, index 2)
+    if (type === 'entree') {
+        dataFinance.entrees[2] += val;
+    } else {
+        dataFinance.depenses[2] += val;
+    }
+
+    localStorage.setItem('aura_data', JSON.stringify(dataFinance));
+    updateUI();
+}
+
+function updateUI() {
+    myChart.update();
+    // Ici, tu peux aussi mettre à jour ton Solde Total affiché en haut
+}
+
+window.onload = initChart;
