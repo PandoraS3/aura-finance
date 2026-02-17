@@ -18,12 +18,57 @@
         <section class="main-stats">
             <div class="card balance-card">
                 <h3>Solde Total</h3>
-                <p class="amount" id="totalBalance">12 450,00 €</p>
+                <p class="amount" id="totalBalance">0,00 €</p>
             </div>
             <div class="card savings-card">
-                <h3>Épargne</h3>
-                <p class="amount" id="totalSavings">4 200,00 €</p>
+                <h3>Épargne Estimée</h3>
+                <p class="amount" id="totalSavings">0,00 €</p>
             </div>
+        </section>
+
+        <section class="card input-section">
+            <h2>Enregistrer une Transaction</h2>
+            <div class="transaction-form">
+                <input type="text" id="desc" placeholder="Description (ex: Salaire, Loyer...)">
+                <input type="number" id="val" placeholder="Montant (€)">
+                <select id="type">
+                    <option value="entree">Entrée (+)</option>
+                    <option value="depense">Dépense (-)</option>
+                </select>
+                <button onclick="addTransaction()">Ajouter</button>
+            </div>
+        </section>
+
+        <div class="dashboard-grid">
+            <section class="card chart-section">
+                <h2>Analyse Mensuelle</h2>
+                <canvas id="financeChart"></canvas>
+            </section>
+
+            <section class="card history-section">
+                <h2>Derniers Flux</h2>
+                <ul id="historyList" class="custom-list">
+                    </ul>
+                <div class="history-controls">
+                    <button onclick="clearHistory()" class="btn-secondary">Réinitialiser les données</button>
+                </div>
+            </section>
+        </div>
+
+        <section class="card summary-section">
+            <h2>Récapitulatif Détaillé</h2>
+            <table id="monthlyTable">
+                <thead>
+                    <tr>
+                        <th>Mois</th>
+                        <th>Entrées</th>
+                        <th>Dépenses</th>
+                        <th>Net</th>
+                    </tr>
+                </thead>
+                <tbody id="monthlyTableBody">
+                    </tbody>
+            </table>
         </section>
 
         <section class="goal-engine card">
@@ -31,38 +76,11 @@
             <div class="input-group">
                 <input type="number" id="targetAmount" placeholder="Montant cible (ex: 10000)">
                 <input type="number" id="monthlyInput" placeholder="Épargne mensuelle">
-                <button onclick="calculateGoal()">Analyser la faisabilité</button>
+                <button onclick="calculateGoal()">Analyser</button>
             </div>
             <p id="goalResult" class="result-text"></p>
         </section>
 
-       <section class="card input-section">
-    <h2>Enregistrer une Transaction</h2>
-    <div class="transaction-form">
-        <input type="text" id="desc" placeholder="Description (ex: Restaurant, Salaire...)">
-        <input type="number" id="val" placeholder="Montant (€)">
-        <select id="type">
-            <option value="entree">Entrée (+)</option>
-            <option value="depense">Dépense (-)</option>
-        </select>
-        <button onclick="addTransaction()">Ajouter</button>
-    </div>
-</section>
-
-<section class="card chart-section">
-    <h2>Analyse Mensuelle</h2>
-    <canvas id="financeChart"></canvas>
-</section>
-    </div>
-    <script src="script.js"></script>
-    
-    <section class="card history-section">
-    <h2>Historique des Flux</h2>
-    <div class="history-controls">
-        <button onclick="clearHistory()" class="btn-secondary">Réinitialiser</button>
-    </div>
-    <ul id="historyList" class="custom-list">
-        </ul>
-</section>
+    </div> <script src="script.js"></script>
 </body>
 </html>
