@@ -143,6 +143,30 @@ tr:hover {
     background: rgba(46, 204, 113, 0.05); /* Léger reflet vert au survol */
 }
 
+/* Boutons d'action dans l'historique */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+.btn-edit, .btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 2px;
+    transition: transform 0.2s;
+}
+
+.btn-edit { color: #3498db; }
+.btn-delete { color: #e74c3c; }
+
+.btn-edit:hover, .btn-delete:hover { transform: scale(1.2); }
+
+/* Modification pour le tableau */
+#monthlyTable { margin-top: 15px; border-radius: 8px; overflow: hidden; }
+
 /* Responsive : sur téléphone, on rempile l'un sur l'autre */
 @media (max-width: 768px) {
     .dashboard-grid { grid-template-columns: 1fr; }

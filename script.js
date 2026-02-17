@@ -1,181 +1,133 @@
-// 1. Initialisation des données (Récupération du localStorage ou données vides)
 let dataFinance = JSON.parse(localStorage.getItem('aura_data')) || { 
-    entrees: [0, 0, 0, 0, 0, 500], // Exemple avec une donnée en Mars (index 5)
-    depenses: [0, 0, 0, 0, 0, 200], 
+    entrees: [0, 0, 0, 0, 0, 0], 
+    depenses: [0, 0, 0, 0, 0, 0], 
     historique: [] 
 };
 
 let myChart;
 const moisLabels = ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar'];
-const moisComplets = ['Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars'];
 
-// 2. Fonction pour initialiser le Graphique
 function initChart() {
     const ctx = document.getElementById('financeChart').getContext('2d');
-    
-    if (myChart) { myChart.destroy(); }
-
+    if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: moisLabels,
-            datasets: [{
-                label: 'Entrées (€)',
-                data: dataFinance.entrees,
-                backgroundColor: '#2ecc71',
-                borderRadius: 5
-            }, {
-                label: 'Dépenses (€)',
-                data: dataFinance.depenses,
-                backgroundColor: '#e74c3c',
-                borderRadius: 5
-            }]
+            datasets: [
+                { label: 'Entrées', data: dataFinance.entrees, backgroundColor: '#2ecc71' },
+                { label: 'Dépenses', data: dataFinance.depenses, backgroundColor: '#e74c3c' }
+            ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { labels: { color: '#ffffff', font: { family: 'Inter' } } }
-            },
-            scales: {
-                y: { grid: { color: '#222' }, ticks: { color: '#aaa' } },
-                x: { grid: { display: false }, ticks: { color: '#aaa' } }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } } }
     });
 }
 
-// 3. Ajouter une transaction
-function addTransaction() {
+function processTransaction() {
     const desc = document.getElementById('desc').value;
     const val = parseFloat(document.getElementById('val').value);
     const type = document.getElementById('type').value;
+    const editIndex = parseInt(document.getElementById('editIndex').value);
 
-    if (!desc || isNaN(val) || val <= 0) {
-        alert("Veuillez entrer une description et un montant valide.");
-        return;
-    }
+    if (!desc || isNaN(val)) return alert("Remplissez les champs");
 
-    const nouvelleTransaction = {
-        id: Date.now(),
-        description: desc,
-        montant: val,
-        type: type,
-        date: new Date().toLocaleDateString('fr-FR')
-    };
-
-    // Ajouter à l'historique (au début)
-    dataFinance.historique.unshift(nouvelleTransaction);
-
-    // Mettre à jour le graphique (Index 5 = Mars)
-    if (type === 'entree') {
-        dataFinance.entrees[5] += val;
+    if (editIndex === -1) {
+        // AJOUT
+        const newTrans = { id: Date.now(), description: desc, montant: val, type: type, date: new Date().toLocaleDateString('fr-FR') };
+        dataFinance.historique.unshift(newTrans);
     } else {
-        dataFinance.depenses[5] += val;
+        // MODIFICATION (On annule l'ancien impact avant d'ajouter le nouveau)
+        const old = dataFinance.historique[editIndex];
+        recalculateGraphImpact(old.type, -old.montant); 
+        
+        dataFinance.historique[editIndex] = { ...dataFinance.historique[editIndex], description: desc, montant: val, type: type };
     }
 
-    // Sauvegarder
+    // Mise à jour impact graphique (Index 5 = Mars)
+    recalculateGraphImpact(type, val);
+    saveAndRefresh();
+    resetForm();
+}
+
+function recalculateGraphImpact(type, montant) {
+    if (type === 'entree') dataFinance.entrees[5] += montant;
+    else dataFinance.depenses[5] += montant;
+}
+
+function deleteTransaction(index) {
+    if (confirm("Supprimer cette transaction ?")) {
+        const item = dataFinance.historique[index];
+        recalculateGraphImpact(item.type, -item.montant);
+        dataFinance.historique.splice(index, 1);
+        saveAndRefresh();
+    }
+}
+
+function editTransaction(index) {
+    const item = dataFinance.historique[index];
+    document.getElementById('desc').value = item.description;
+    document.getElementById('val').value = item.montant;
+    document.getElementById('type').value = item.type;
+    document.getElementById('editIndex').value = index;
+    document.getElementById('submitBtn').innerText = "Modifier";
+    document.getElementById('formTitle').innerText = "Modifier la Transaction";
+    window.scrollTo(0, 0);
+}
+
+function saveAndRefresh() {
     localStorage.setItem('aura_data', JSON.stringify(dataFinance));
-    
-    // Rafraîchir toute l'interface
-    refreshUI();
-
-    // Reset formulaire
-    document.getElementById('desc').value = '';
-    document.getElementById('val').value = '';
-}
-
-// 4. Afficher l'historique (Liste à côté du graphique)
-function renderHistory() {
-    const listElement = document.getElementById('historyList');
-    if (!listElement) return;
-    
-    listElement.innerHTML = '';
-    // On ne montre que les 10 dernières pour garder le style épuré
-    const limitedHistory = dataFinance.historique.slice(0, 10);
-
-    limitedHistory.forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'transaction-item';
-        const isEntree = item.type === 'entree';
-
-        li.innerHTML = `
-            <div>
-                <span class="item-desc">${item.description}</span>
-                <span class="item-date">${item.date}</span>
-            </div>
-            <span class="${isEntree ? 'pos' : 'neg'}">${isEntree ? '+' : '-'} ${item.montant.toLocaleString()} €</span>
-        `;
-        listElement.appendChild(li);
-    });
-}
-
-// 5. Afficher le tableau récapitulatif (En bas)
-function renderMonthlyTable() {
-    const tableBody = document.getElementById('monthlyTableBody');
-    if (!tableBody) return;
-    tableBody.innerHTML = '';
-
-    moisComplets.forEach((mois, index) => {
-        const ent = dataFinance.entrees[index] || 0;
-        const dep = dataFinance.depenses[index] || 0;
-        const net = ent - dep;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${mois}</td>
-            <td class="pos">+ ${ent.toLocaleString()} €</td>
-            <td class="neg">- ${dep.toLocaleString()} €</td>
-            <td style="font-weight: bold; color: ${net >= 0 ? '#2ecc71' : '#e74c3c'}">
-                ${net.toLocaleString()} €
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
-
-// 6. Mise à jour des stats globales (Solde et Épargne)
-function updateStats() {
-    const totalEntrees = dataFinance.entrees.reduce((a, b) => a + b, 0);
-    const totalDepenses = dataFinance.depenses.reduce((a, b) => a + b, 0);
-    const solde = totalEntrees - totalDepenses;
-    
-    // On considère l'épargne comme le solde positif accumulé
-    document.getElementById('totalBalance').innerText = `${solde.toLocaleString()} €`;
-    document.getElementById('totalSavings').innerText = `${(solde > 0 ? solde : 0).toLocaleString()} €`;
-}
-
-// 7. Calculateur d'objectif
-function calculateGoal() {
-    const target = document.getElementById('targetAmount').value;
-    const monthly = document.getElementById('monthlyInput').value;
-    const resultDisplay = document.getElementById('goalResult');
-
-    if (target > 0 && monthly > 0) {
-        const months = Math.ceil(target / monthly);
-        resultDisplay.innerHTML = `Objectif atteignable en <strong>${months} mois</strong>.`;
-        resultDisplay.style.color = "#2ecc71";
-    }
-}
-
-// 8. Fonction de rafraîchissement global
-function refreshUI() {
-    initChart();
     renderHistory();
     renderMonthlyTable();
     updateStats();
+    initChart();
 }
 
-// 9. Nettoyer tout
-function clearHistory() {
-    if(confirm("Voulez-vous réinitialiser toutes vos données ?")) {
-        localStorage.removeItem('aura_data');
-        location.reload();
-    }
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    list.innerHTML = '';
+    dataFinance.historique.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'transaction-item';
+        li.innerHTML = `
+            <div><span class="item-desc">${item.description}</span><br><small>${item.date}</small></div>
+            <div style="display:flex; align-items:center;">
+                <span class="${item.type === 'entree' ? 'pos' : 'neg'}">${item.montant} €</span>
+                <div class="actions">
+                    <button class="btn-edit" onclick="editTransaction(${index})">✎</button>
+                    <button class="btn-delete" onclick="deleteTransaction(${index})">🗑</button>
+                </div>
+            </div>`;
+        list.appendChild(li);
+    });
 }
 
-// Lancement au chargement de la page
-window.onload = function() {
-    refreshUI();
+function renderMonthlyTable() {
+    const body = document.getElementById('monthlyTableBody');
+    body.innerHTML = '';
+    ['Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars'].forEach((mois, i) => {
+        const net = dataFinance.entrees[i] - dataFinance.depenses[i];
+        body.innerHTML += `<tr><td>${mois}</td><td class="pos">${dataFinance.entrees[i]}€</td><td class="neg">${dataFinance.depenses[i]}€</td><td style="color:${net>=0?'#2ecc71':'#e74c3c'}">${net}€</td></tr>`;
+    });
+}
+
+function updateStats() {
+    const totalE = dataFinance.entrees.reduce((a, b) => a + b, 0);
+    const totalD = dataFinance.depenses.reduce((a, b) => a + b, 0);
+    document.getElementById('totalBalance').innerText = `${totalE - totalD} €`;
+    document.getElementById('totalSavings').innerText = `${totalE - totalD > 0 ? totalE - totalD : 0} €`;
+}
+
+function resetForm() {
+    document.getElementById('desc').value = '';
+    document.getElementById('val').value = '';
+    document.getElementById('editIndex').value = "-1";
+    document.getElementById('submitBtn').innerText = "Ajouter";
+    document.getElementById('formTitle').innerText = "Enregistrer une Transaction";
+}
+
+function clearHistory() { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } }
+
+window.onload = () => {
+    saveAndRefresh();
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 };
